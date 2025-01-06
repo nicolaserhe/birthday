@@ -4,6 +4,7 @@ from astropy.coordinates import get_sun, GeocentricTrueEcliptic
 from datetime import datetime, timedelta
 from astropy import units as u
 import numpy as np
+from lunarcalendar import Lunar
 
 
 # 加载天文学数据
@@ -19,8 +20,8 @@ sun = ephemeris['sun']
 # 计算冬至时刻的函数
 def calculate_winter_solstice(year: int) -> datetime:
     # 设置起始日期范围
-    start_time = Time(f'{year}-01-01')  # 年初
-    end_time = Time(f'{year+1}-01-01')  # 次年年初
+    start_time = Time(f'{year}-12-21')
+    end_time = Time(f'{year+1}-12-24')
 
     # 通过获取太阳位置找到冬至时刻
     times = np.linspace(start_time.jd, end_time.jd, 10000)  # 创建时间点
@@ -38,11 +39,15 @@ def calculate_winter_solstice(year: int) -> datetime:
     # 查找太阳黄道经度最接近 270 度（即冬至的经度）
     winter_solstice_time = times[np.abs(sun_lon - 270 * u.deg).argmin()]
 
-    # 输出计算出的冬至时刻
-    return winter_solstice_time.iso
+    # 将冬至时刻转换为北京时间（加8小时）
+    winter_solstice_time_utc = winter_solstice_time.datetime  # 获取 UTC 时间
+    winter_solstice_time_bj = winter_solstice_time_utc + timedelta(hours=8)
+
+    # 返回北京时间
+    return winter_solstice_time_bj
 
 
-def calculate_lunar_conjunction(year: int, month: int) -> datetime:
+def calculate_lunar_conjunction(lunar_date: Lunar) -> datetime:
     """
     计算指定年月的最近新月（合朔）时刻，并返回北京时间。
 
@@ -53,20 +58,29 @@ def calculate_lunar_conjunction(year: int, month: int) -> datetime:
     返回:
     - 新月时刻（北京时间）
     """
-    # 使用 Skyfield 加载输入的农历日期，并转为阳历日期
-    start_time = ts.utc(year, month, 1)  # 获取输入的阳历日期
+    # 将农历日期转换为阳历日期
+    solar_date = lunar_date.to_date()
+
+    # 使用 Skyfield 加载阳历日期
+    start_time = ts.utc(solar_date.year, solar_date.month, solar_date.day)
 
     # 设置一个合理的结束时间范围
-    end_time = ts.utc(year, month + 1, 1)  # 下一个月的开始
+    end_time = ts.utc(solar_date.year, solar_date.month, solar_date.day + 1)
 
     # 查找指定时间范围内最近的新月时刻
     closest_new_moon_time = find_new_moon(start_time, end_time)
 
     # 获取新月时刻的 UTC 时间
-    new_moon_utc = closest_new_moon_time.utc_iso()  # 获取 UTC 时间字符串
+    new_moon_utc = closest_new_moon_time.utc_iso()
+
+    # 将UTC时间转换为 datetime 对象
+    new_moon_utc_time = datetime.fromisoformat(new_moon_utc)
+
+    # 将UTC时间转换为北京时间（加8小时）
+    new_moon_bj_time = new_moon_utc_time + timedelta(hours=8)
 
     # 返回北京时间
-    return new_moon_utc
+    return new_moon_bj_time
 
 
 def find_new_moon(start_time, end_time, num_points=10000):

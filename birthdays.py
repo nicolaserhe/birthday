@@ -1,5 +1,5 @@
 from lunarcalendar import Lunar
-from datetime import datetime, timedelta
+from datetime import date, datetime, timedelta
 from dataclasses import dataclass
 import ephem
 from skyfield.api import load
@@ -19,6 +19,8 @@ TAISUI_LAST = [
 HEAVENLY_STEMS = ["甲", "乙", "丙", "丁", "戊", "己", "庚", "辛", "壬", "癸"]
 EARTHLY_BRANCHES = ["子", "丑", "寅", "卯", "辰", "巳", "午", "未", "申", "酉", "戌", "亥"]
 
+# 月数
+LUNAR_MONTHS = ["一", "二", "三", "四", "五", "六", "七", "八", "九", "十", "十一", "十二"]
 
 # 生日信息
 @dataclass
@@ -42,17 +44,35 @@ class BirthdayInfo:
         # 计算冬至时刻
         self.winter_solstice = calculate_winter_solstice_at_new_year(self.solar_birthday)
 
+        # 计算出生月合朔时刻
+        self.lunar_conjunction_birthday = calculate_lunar_conjunction_at_birthday(self.solar_birthday)
+
     # 打印生日信息的函数
     def print_birthdayInfo(self):
         print(f"岁名 {self.taisui_name}")
-        # print(f"前十一月{}朔{}日冬至")
-        print(f"合朔时刻: {self.lunar_conjunction}")
-        print(f"冬至时刻: {self.winter_solstice}")
-        # lunar_birthday = Lunar.fromSolar(solar_birthday)
-        # base_date = Lunar(birthdayInfo.winter_solstice.year, 11, 1).to_date()    # 转换为公历日期
-        # print(f"前十一月{}朔{}日冬至")
-        return
 
+        ganzhi_at_new_year = get_ganzhi_day(self.lunar_conjunction.date())
+        ganzhi_winter_solstice = get_ganzhi_day(self.winter_solstice.date())
+        print(f"前十一月{ganzhi_at_new_year}朔{ganzhi_winter_solstice}日冬至")
+        # 将北京时间格式化为 "YYYY-MM-DD HH:MM:SS" 格式（没有微秒）
+        formatted_bj_time = self.lunar_conjunction.strftime('%Y-%m-%d %H:%M:%S')
+        print(f"合朔时刻: {formatted_bj_time}")
+        formatted_bj_time = self.winter_solstice.strftime('%Y-%m-%d %H:%M:%S')
+        print(f"冬至时刻: {formatted_bj_time}")
+
+        ganzhi_at_month = get_ganzhi_day(self.lunar_conjunction_birthday.date())
+        ganzhi_at_birthday = get_ganzhi_day(self.solar_birthday)
+        if self.lunar_birthday.isleap:
+            print(f"闰{LUNAR_MONTHS[self.lunar_birthday.month - 1]}月{ganzhi_at_month}朔{ganzhi_at_birthday}日出生")
+        else:
+            print(f"{LUNAR_MONTHS[self.lunar_birthday.month - 1]}月{ganzhi_at_month}朔{ganzhi_at_birthday}日出生")
+        # 将北京时间格式化为 "YYYY-MM-DD HH:MM:SS" 格式（没有微秒）
+        formatted_bj_time = self.lunar_conjunction_birthday.strftime('%Y-%m-%d %H:%M:%S')
+        print(f"合朔时刻: {formatted_bj_time}")
+        formatted_bj_time = self.solar_birthday.strftime('%Y-%m-%d %H:%M:%S')
+        print(f"出生时刻: {formatted_bj_time}")
+
+        return
 
 
 def get_valid_date() -> datetime:
@@ -84,7 +104,7 @@ def get_valid_date() -> datetime:
 
 
 # 计算岁名函数
-def get_suiming(solar_date: datetime) -> str:
+def get_suiming(solar_date: date) -> str:
     # 基准岁名：昭阳大荒落
     base_year = 2001;
 
@@ -113,7 +133,7 @@ def get_suiming(solar_date: datetime) -> str:
 
 
 # 计算干支日的函数
-def get_ganzhi_day(solar_date: datetime) -> str:
+def get_ganzhi_day(solar_date: date) -> str:
     # 基准日期：昭阳大荒落 子月戊子朔
     base_date = Lunar(2000, 11, 1).to_date()    # 转换为公历日期
 
@@ -137,13 +157,22 @@ def calculate_lunar_conjunction_at_new_year(solar_date: datetime) -> datetime:
     lunar_date = Lunar.from_date(solar_date)
     if lunar_date.month >= 11 and lunar_date.year == solar_date.year:
         # 如果农历在11月1日之后并且阳历和农历年相等, 计算当年农历十一月日月合朔时刻
-        year = solar_date.year
+        lunar_date.year = solar_date.year
     else:
         # 否则, 计算前一年日月合朔时刻
-        year = solar_date.year - 1
+        lunar_date.year = solar_date.year - 1
 
     # 获取农历11月1日的日月合朔时刻
-    return astronomical_events.calculate_lunar_conjunction(year, 11)
+    lunar_date.month = 11
+    lunar_date.isleap = False
+    lunar_date.day = 1
+    return astronomical_events.calculate_lunar_conjunction(lunar_date)
+
+
+def calculate_lunar_conjunction_at_birthday(solar_date: datetime) -> datetime:
+    lunar_date = Lunar.from_date(solar_date)
+    lunar_date.day = 1
+    return astronomical_events.calculate_lunar_conjunction(lunar_date)
 
 
 def calculate_winter_solstice_at_new_year(solar_date: datetime) -> datetime:
