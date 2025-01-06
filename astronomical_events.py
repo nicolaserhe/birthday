@@ -20,8 +20,8 @@ sun = ephemeris['sun']
 # 计算冬至时刻的函数
 def calculate_winter_solstice(year: int) -> datetime:
     # 设置起始日期范围
-    start_time = Time(f'{year}-12-21')
-    end_time = Time(f'{year+1}-12-24')
+    start_time = Time(f'{year}-12-20')
+    end_time = Time(f'{year}-12-24')
 
     # 通过获取太阳位置找到冬至时刻
     times = np.linspace(start_time.jd, end_time.jd, 10000)  # 创建时间点
