@@ -1,0 +1,48 @@
+:root,
+[data-theme="dark"] {
+  --bg: #09090d;
+  --card: #14141e;
+  --card-hover: #1a1a28;
+  --primary: #818cf8;
+  --primary-hover: #6d7ae8;
+  --primary-light: rgba(129, 140, 248, 0.1);
+  --primary-glow: rgba(129, 140, 248, 0.2);
+  --accent: #f0c060;
+  --text: #e4e4ec;
+  --text-secondary: #7c7c94;
+  --border: #1e1e2e;
+  --input-bg: #1a1a28;
+}
+
+[data-theme="light"] {
+  --bg: #f4f4f8;
+  --card: #ffffff;
+  --card-hover: #f0f0f5;
+  --primary: #6d76e8;
+  --primary-hover: #5b64d6;
+  --primary-light: rgba(109, 118, 232, 0.08);
+  --primary-glow: rgba(109, 118, 232, 0.18);
+  --accent: #d49430;
+  --text: #1a1a2e;
+  --text-secondary: #6b6b80;
+  --border: #e6e6f0;
+  --input-bg: #eeeef4;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  transition: background 0.3s, color 0.3s;
+}
