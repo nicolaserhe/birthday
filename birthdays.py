@@ -36,8 +36,12 @@ class BirthdayInfo:
     taisui_name: str = None
     lunar_conjunction: datetime = None
     winter_solstice: datetime = None
+    longitude: float = None
 
     def calc_birthdayInfo(self):
+        # 计算出生时刻太阳的黄经
+        self.longitude = astronomical_events.calculate_sun_longitude(self.solar_birthday)
+
         # 取得农历生日
         self.lunar_birthday = Lunar.from_date(self.solar_birthday)
 
@@ -78,12 +82,12 @@ class BirthdayInfo:
         formatted_bj_time = self.solar_birthday.strftime('%Y-%m-%d %H:%M:%S')
         print(f"出生时刻: {formatted_bj_time}")
 
-
         if self.lunar_birthday.isleap:
             print(f"农历生日: 闰{LUNAR_MONTHS[self.lunar_birthday.month - 1]}月{LUNAR_DAYS[self.lunar_birthday.day - 1]}")
         else:
             print(f"农历生日: {LUNAR_MONTHS[self.lunar_birthday.month - 1]}月{LUNAR_DAYS[self.lunar_birthday.day - 1]}")
 
+        print(f"出生时刻太阳的黄经: {self.longitude}°")
         return
 
 

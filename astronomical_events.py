@@ -5,6 +5,8 @@ from datetime import datetime, timedelta
 from astropy import units as u
 import numpy as np
 from lunarcalendar import Lunar
+from astroquery.jplhorizons import Horizons
+import pytz
 
 
 # 加载天文学数据
@@ -116,3 +118,18 @@ def find_new_moon(start_time, end_time, num_points=10000):
     # 找到相位角最小的时间点，即合朔
     min_index = np.argmin(moon_phase_angles)
     return times[min_index]
+
+
+def calculate_sun_longitude(solar_date: datetime) -> float:
+    # 转换输入的北京时间（UTC+8）为 UTC 时间
+    beijing_tz = pytz.timezone('Asia/Shanghai')
+    date_beijing = beijing_tz.localize(solar_date)      # 本地化为北京时间
+    date_utc = date_beijing.astimezone(pytz.utc)        # 转换为UTC时间
+    # 获取太阳的坐标
+    time = Time(date_utc)
+    sun = get_sun(time)
+
+    # 转换为黄道坐标
+    ecliptic_coords = sun.transform_to(GeocentricTrueEcliptic(equinox=time))
+    sun_ecliptic_longitude = ecliptic_coords.lon  # 黄经 (度)
+    return sun_ecliptic_longitude.value
