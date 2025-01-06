@@ -62,7 +62,7 @@ def calculate_lunar_conjunction(lunar_date: Lunar) -> datetime:
     solar_date = lunar_date.to_date()
 
     # 使用 Skyfield 加载阳历日期
-    start_time = ts.utc(solar_date.year, solar_date.month, solar_date.day)
+    start_time = ts.utc(solar_date.year, solar_date.month, solar_date.day - 1)
 
     # 设置一个合理的结束时间范围
     end_time = ts.utc(solar_date.year, solar_date.month, solar_date.day + 1)
