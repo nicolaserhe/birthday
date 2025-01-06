@@ -20,7 +20,14 @@ HEAVENLY_STEMS = ["甲", "乙", "丙", "丁", "戊", "己", "庚", "辛", "壬",
 EARTHLY_BRANCHES = ["子", "丑", "寅", "卯", "辰", "巳", "午", "未", "申", "酉", "戌", "亥"]
 
 # 月数
-LUNAR_MONTHS = ["一", "二", "三", "四", "五", "六", "七", "八", "九", "十", "十一", "十二"]
+LUNAR_MONTHS = ["正", "二", "三", "四", "五", "六", "七", "八", "九", "十", "十一", "十二"]
+# 天数
+LUNAR_DAYS = [
+    "初一", "初二", "初三", "初四", "初五", "初六", "初七", "初八", "初九",
+    "十", "十一", "十二", "十三", "十四", "十五", "十六", "十七", "十八",
+    "十九", "廿", "廿一", "廿二", "廿三", "廿四", "廿五", "廿六", "廿七",
+    "廿八", "廿九", "三十"
+]
 
 # 生日信息
 @dataclass
@@ -71,6 +78,12 @@ class BirthdayInfo:
         print(f"合朔时刻: {formatted_bj_time}")
         formatted_bj_time = self.solar_birthday.strftime('%Y-%m-%d %H:%M:%S')
         print(f"出生时刻: {formatted_bj_time}")
+
+
+        if self.lunar_birthday.isleap:
+            print(f"农历生日: 闰{LUNAR_MONTHS[self.lunar_birthday.month - 1]}月{LUNAR_DAYS[self.lunar_birthday.day - 1]}")
+        else:
+            print(f"农历生日: {LUNAR_MONTHS[self.lunar_birthday.month - 1]}月{LUNAR_DAYS[self.lunar_birthday.day - 1]}")
 
         return
 
