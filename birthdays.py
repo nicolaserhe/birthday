@@ -71,7 +71,7 @@ class BirthdayInfo:
         print(f"冬至时刻: {formatted_bj_time}")
 
         ganzhi_at_month = get_ganzhi_day(self.lunar_conjunction_birthday.date())
-        ganzhi_at_birthday = get_ganzhi_day(self.solar_birthday)
+        ganzhi_at_birthday = get_ganzhi_day(self.solar_birthday.date())
         if self.lunar_birthday.isleap:
             print(f"闰{LUNAR_MONTHS[self.lunar_birthday.month - 1]}月{ganzhi_at_month}朔{ganzhi_at_birthday}日出生")
         else:

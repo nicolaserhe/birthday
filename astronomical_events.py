@@ -133,3 +133,26 @@ def calculate_sun_longitude(solar_date: datetime) -> float:
     ecliptic_coords = sun.transform_to(GeocentricTrueEcliptic(equinox=time))
     sun_ecliptic_longitude = ecliptic_coords.lon  # 黄经 (度)
     return sun_ecliptic_longitude.value
+
+
+def find_solar_longitude(year, target_longitude):
+    # 设置时间范围
+    start_time = ts.utc(year, 1, 1)
+    end_time = ts.utc(year + 1, 1, 1)
+
+    # 计算太阳的位置
+    def solar_longitude_at(t):
+        astrometric = earth.at(t).observe(ephemeris['sun'])
+        longitude = astrometric.apparent().ecliptic_latlon()[1].degrees
+        return longitude
+
+    # 搜索目标黄经
+    step_days = 0.1  # 调整步长以获得更高的精度
+    t = start_time
+    while t < end_time:
+        longitude = solar_longitude_at(t)
+        if abs(longitude - target_longitude) < 0.01:
+            bj_time = t.utc_datetime() + timedelta(hours=8)  # 转换为北京时间
+            return bj_time
+        t = ts.tt_jd(t.tt + step_days)
+    return None
